@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { OK, NOT_FOUND, BAD_REQUEST } from 'http-status-codes';
+import httpErrors from 'http-errors';
+import { StatusCodes } from 'http-status-codes';
 import { compareSync } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 
@@ -13,14 +14,14 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(BAD_REQUEST).send();
+      throw httpErrors(StatusCodes.BAD_REQUEST);
     }
     const user: IUser = await authService.getByEmail(email);
     if (!user) {
-      res.status(NOT_FOUND).send();
+      throw httpErrors(StatusCodes.NOT_FOUND);
     }
     if (!compareSync(password, user.password)) {
-      res.status(BAD_REQUEST).send();
+      throw httpErrors(StatusCodes.BAD_REQUEST);
     }
     const token = sign(
       {
@@ -29,7 +30,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       config.SECRET_KEY,
     );
     delete user.password;
-    res.status(OK).send({ ...user, token });
+    res.status(StatusCodes.OK).send({ ...user, token });
   } catch (err) {
     next(err);
   }
@@ -39,11 +40,11 @@ export async function register(req: Request, res: Response, next: NextFunction) 
   try {
     const { username, password, email } = req.body;
     if (!username || !email || !password) {
-      res.status(BAD_REQUEST).send();
+      throw httpErrors(StatusCodes.BAD_REQUEST);
     }
     const exist: number = await userService.count({ email });
     if (exist) {
-      res.status(BAD_REQUEST).send();
+      throw httpErrors(StatusCodes.BAD_REQUEST);
     }
 
     const user: IUser = await userService.create({
@@ -59,7 +60,7 @@ export async function register(req: Request, res: Response, next: NextFunction) 
       config.SECRET_KEY,
     );
     delete user.password;
-    res.status(OK).send({ ...user, token });
+    res.status(StatusCodes.OK).send({ ...user, token });
   } catch (err) {
     next(err);
   }

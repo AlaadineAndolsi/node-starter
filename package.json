@@ -4,7 +4,7 @@
   "description": "Node ts starter project",
   "main": "bin/start.ts",
   "scripts": {
-    "start": "node node_modules/.bin/ts-node bin/start.ts",
+    "start": "ts-node bin/start.ts",
     "prod": "tsc && node ./dist/bin/start.js",
     "lint": "eslint **/*.ts",
     "format": "eslint **/*.ts --fix"

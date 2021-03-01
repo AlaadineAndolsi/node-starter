@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { UNAUTHORIZED } from 'http-status-codes';
+import httpErrors from 'http-errors';
+import { StatusCodes } from 'http-status-codes';
 
 import { IUser } from '../../types';
 import * as authService from '../../services/auth.service';
@@ -11,8 +12,9 @@ export async function authHandler(req: Request, res: Response, next: NextFunctio
     // @ts-ignore
     const usr: IUser = await authService.getById(user?.id);
     if (!usr) {
-      res.status(UNAUTHORIZED).send();
+      throw httpErrors(StatusCodes.UNAUTHORIZED);
     } else {
+      req.user = usr;
       next();
     }
   } catch (err) {
